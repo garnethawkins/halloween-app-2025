@@ -153,6 +153,23 @@
             text-decoration: none;
             cursor: pointer;
         }
+        /* Styles for the password change modal form */
+        #change-password-form {
+            display: flex;
+            flex-direction: column;
+        }
+        #change-password-form label {
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+        #change-password-form input {
+            padding: 8px;
+            font-size: 1rem;
+        }
+        #change-password-form button {
+            margin-top: 20px;
+        }
+        #password-status { margin-top: 10px; }
 
         /* Responsive styles for smaller screens */
         @media (max-width: 600px) {
@@ -234,6 +251,12 @@
         </form>
         <p id="rules-status"></p>
 
+        <hr>
+
+        <h2>Account Management</h2>
+        <button id="open-password-modal-btn">Change Password</button>
+
+
 
         <!-- The Modal -->
         <div id="location-modal" class="modal">
@@ -243,6 +266,24 @@
                 <p>Click on the map to place the marker accurately.</p>
                 <div id="location-map"></div>
                 <button id="save-location-btn">Save Location</button>
+            </div>
+        </div>
+
+        <!-- The Password Change Modal -->
+        <div id="password-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-password">&times;</span>
+                <h2>Change Admin Password</h2>
+                <form id="change-password-form">
+                    <label for="current-password">Current Password:</label>
+                    <input type="password" id="current-password" required>
+                    <label for="new-password">New Password:</label>
+                    <input type="password" id="new-password" required>
+                    <label for="confirm-password">Confirm New Password:</label>
+                    <input type="password" id="confirm-password" required>
+                    <button type="submit">Update Password</button>
+                </form>
+                <p id="password-status"></p>
             </div>
         </div>
     </div>
@@ -402,6 +443,61 @@
             setTimeout(() => rulesStatusEl.textContent = '', 3000);
         });
 
+        // --- Password Change Modal Logic ---
+        const passwordModal = document.getElementById('password-modal');
+        const openPasswordModalBtn = document.getElementById('open-password-modal-btn');
+        const closePasswordBtn = document.querySelector('#password-modal .close-password');
+        const passwordForm = document.getElementById('change-password-form');
+        const passwordStatusEl = document.getElementById('password-status');
+
+        openPasswordModalBtn.onclick = () => {
+            passwordModal.style.display = 'block';
+            passwordStatusEl.textContent = '';
+            passwordForm.reset();
+        };
+
+        closePasswordBtn.onclick = () => {
+            passwordModal.style.display = 'none';
+        };
+
+        passwordForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            passwordStatusEl.textContent = '';
+
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            if (newPassword !== confirmPassword) {
+                passwordStatusEl.style.color = 'red';
+                passwordStatusEl.textContent = 'New passwords do not match.';
+                return;
+            }
+
+            if (newPassword.length < 8) {
+                passwordStatusEl.style.color = 'red';
+                passwordStatusEl.textContent = 'New password must be at least 8 characters long.';
+                return;
+            }
+
+            const response = await fetch('/api/change-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ currentPassword, newPassword })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                passwordStatusEl.style.color = 'green';
+                passwordStatusEl.textContent = result.message;
+                setTimeout(() => passwordModal.style.display = 'none', 2000);
+            } else {
+                passwordStatusEl.style.color = 'red';
+                passwordStatusEl.textContent = result.message;
+            }
+        });
+
         // --- Modal and Map Logic ---
         const modal = document.getElementById('location-modal');
         const closeBtn = document.querySelector('.modal .close');
@@ -411,7 +507,7 @@
 
         closeBtn.onclick = () => modal.style.display = "none";
         window.onclick = (event) => {
-            if (event.target == modal) {
+            if (event.target == modal || event.target == passwordModal) {
                 modal.style.display = "none";
             }
         };

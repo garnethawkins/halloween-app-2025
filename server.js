@@ -2,6 +2,7 @@
 const express = require('express');
 const fetch = require('node-fetch'); // We'll need fetch on the server
 const path = require('path');
+const bcrypt = require('bcrypt');
 require('dotenv').config();
 
 // lowdb uses ES Modules, so we need to import it asynchronously
@@ -12,13 +13,24 @@ async function startServer() {
 
     // Configure lowdb to use db.json file
     const adapter = new JSONFile('db.json');
-    const db = new Low(adapter, { addresses: [], rules: "" }); // Provide default data
+    const db = new Low(adapter, { addresses: [], rules: "", adminPassword: "password123" }); // Provide default data
 
     // Read data from db.json
     await db.read();
 
     // If db.json doesn't exist or is empty, set default data and write it.
-    db.data = db.data || { addresses: [], rules: "" };
+    db.data = db.data || { addresses: [], rules: "", adminPassword: "password123" };
+
+    // --- Password Hashing ---
+    // Check if the password is not already hashed. bcrypt hashes start with '$2'.
+    if (db.data.adminPassword && !db.data.adminPassword.startsWith('$2')) {
+        console.log('Plaintext password found. Hashing and updating database.');
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(db.data.adminPassword, saltRounds);
+        db.data.adminPassword = hashedPassword;
+        await db.write(); // Save the hashed password
+    }
+
     await db.write();
 
     // Helper function to add a delay
@@ -99,20 +111,54 @@ async function startServer() {
     app.use(express.static(path.join(__dirname, 'public')));
 
     // Route to handle the sign-in form submission
-    app.post('/signin', (req, res) => {
+    app.post('/signin', async (req, res) => {
         const { username, password } = req.body;
 
-        // Check credentials against environment variables
-        const user = process.env.ADMIN_USERNAME === username &&
-                     process.env.ADMIN_PASSWORD === password;
+        const isUsernameCorrect = process.env.ADMIN_USERNAME === username;
+        let isPasswordCorrect = false;
 
-        if (user) {
+        if (isUsernameCorrect) {
+            // Compare the provided password with the stored hash
+            isPasswordCorrect = await bcrypt.compare(password, db.data.adminPassword);
+        }
+
+        if (isUsernameCorrect && isPasswordCorrect) {
             console.log('Authentication successful. Redirecting to admin page.');
             res.redirect('/admin.html');
         } else {
             console.log('Authentication failed.');
             res.status(401).send('Authentication Failed. <a href="/signin.html">Try again</a>');
         }
+    });
+
+    // API endpoint to change the admin password
+    app.post('/api/change-password', async (req, res) => {
+        const { currentPassword, newPassword } = req.body;
+
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ success: false, message: 'Current and new passwords are required.' });
+        }
+
+        if (newPassword.length < 8) {
+            return res.status(400).json({ success: false, message: 'New password must be at least 8 characters long.' });
+        }
+
+        // 1. Verify the current password
+        const isPasswordCorrect = await bcrypt.compare(currentPassword, db.data.adminPassword);
+
+        if (!isPasswordCorrect) {
+            return res.status(401).json({ success: false, message: 'Incorrect current password.' });
+        }
+
+        // 2. Hash the new password
+        const saltRounds = 10;
+        const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
+
+        // 3. Save the new hashed password
+        db.data.adminPassword = hashedNewPassword;
+        await db.write();
+
+        res.json({ success: true, message: 'Password updated successfully.' });
     });
 
     // Start the server
