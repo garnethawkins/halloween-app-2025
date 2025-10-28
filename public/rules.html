@@ -4,119 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Halloween Rules</title>
-    <style>
-        body {
-            font-family: sans-serif; 
-            text-align: center; 
-            padding: 20px; 
-            margin: 0;
-            min-height: 100vh; /* Ensure body takes full viewport height */
-
-            /* --- Background Image Styles --- */
-            background-image: url('/images/Untitled.png');
-            background-size: cover; /* Scale the image to cover the entire area */
-            background-position: center center; /* Center the image */
-            background-repeat: no-repeat; /* Do not repeat the image */
-            background-attachment: fixed; /* Keep the background fixed during scroll */
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: rgba(29, 29, 29, 0.85); /* Dark, semi-transparent background */
-            backdrop-filter: blur(5px);
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid #333;
-            text-align: left; /* Align rules text to the left */
-            color: #e0e0e0;
-            line-height: 1.6;
-        }
-        h1 {
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Add shadow for readability */
-            text-align: center;
-        }
-        #rules-content {
-            white-space: pre-wrap; /* Respects newlines from the database */
-        }
-
-        /* --- Header and Navigation Styles --- */
-        header {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            padding: 10px 20px;
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            z-index: 1000; /* Ensure header is above the map */
-        }
-
-        .nav-link { 
-            color: white;
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
-            text-decoration: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
-        .nav-link:hover {
-            background-color: rgba(0, 0, 0, 0.2);
-        }
-
-        #hamburger-btn {
-            display: none; /* Hidden on desktop */
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 10px;
-        }
-
-        #hamburger-btn .bar {
-            display: block;
-            width: 25px;
-            height: 3px;
-            margin: 5px auto;
-            background-color: white;
-            transition: all 0.3s ease-in-out;
-        }
-
-        /* Responsive styles for smaller screens */
-        @media (max-width: 768px) {
-            #hamburger-btn {
-                display: block; /* Show hamburger on mobile */
-            }
-
-            #main-nav {
-                display: none; /* Hide nav by default on mobile */
-                position: absolute;
-                top: 60px;
-                right: 20px;
-                background-color: rgba(0, 0, 0, 0.8);
-                backdrop-filter: blur(5px);
-                border-radius: 8px;
-                padding: 10px;
-            }
-
-            #main-nav.is-open {
-                display: block; /* Show nav when hamburger is clicked */
-            }
-
-            #main-nav .nav-link {
-                display: block; /* Stack links vertically */
-                margin: 5px 0; /* Add some vertical spacing */
-            }
-        }
-
-        /* Footer Styles */
-        footer {
-            margin-top: 40px;
-            padding: 20px;
-            color: rgba(255, 255, 255, 0.7); /* Slightly transparent white */
-            font-size: 0.9em;
-        }
-    </style>
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
     <header>
@@ -131,30 +19,15 @@
         </button>
     </header>
 
-    <div class="container" style="margin-top: 80px;">
+    <div class="rules-container main-container">
         <h1>Event Rules</h1>
         <div id="rules-content">
             <p>Loading rules...</p>
         </div>
     </div>
-    <p style="color: white;  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);">Return to <a href="/" style="color: gold;  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);">Map</a></p>
+    <p class="return-link-p">Return to <a href="/" class="return-link-a">Map</a></p>
     <footer>Built by Dragonink Technologies 2025</footer>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Hamburger menu logic
-            const hamburgerBtn = document.getElementById('hamburger-btn');
-            const mainNav = document.getElementById('main-nav');
-            hamburgerBtn.addEventListener('click', () => {
-                mainNav.classList.toggle('is-open');
-            });
-
-            // Fetch and display rules
-            const response = await fetch('/api/rules');
-            const data = await response.json();
-            const rulesContent = document.getElementById('rules-content');
-            rulesContent.textContent = data.rules;
-        });
-    </script>
+    <script src="/js/rules.js"></script>
 </body>
 </html>

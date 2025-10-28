@@ -1,0 +1,351 @@
+/* --- Global and index.html Styles --- */
+body {
+    font-family: sans-serif; 
+    text-align: center; 
+    padding: 20px; 
+    margin: 0;
+    min-height: 100vh; /* Ensure body takes full viewport height */
+
+    /* --- Background Image Styles --- */
+    /* Place your image in the 'public/images' folder and update the filename below */
+    background-image: url('/images/Untitled.png');
+    background-size: cover; /* Scale the image to cover the entire area */
+    background-position: center center; /* Center the image */
+    background-repeat: no-repeat; /* Do not repeat the image */
+    background-attachment: fixed; /* Keep the background fixed during scroll */
+}
+h1 {
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7); /* Add shadow for readability */
+}
+p {
+    color: white;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+}
+#map { 
+    height: 500px; 
+    width: 90%;
+    max-width: 1200px;
+    margin: 20px auto;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.8); /* Make map container slightly transparent */
+    backdrop-filter: blur(2px); /* Blur the background behind the map */
+}
+#page-title {
+    padding-top: 60px;
+}
+.rules-link {
+    color: gold;
+}
+.admin-link { 
+    color: white;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+    text-decoration: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+.admin-link:hover {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+/* --- Header and Navigation Styles (used on multiple pages) --- */
+header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 10px 20px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000; /* Ensure header is above the map */
+}
+
+.nav-link { 
+    color: white;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+    text-decoration: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+.nav-link:hover {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+#hamburger-btn {
+    display: none; /* Hidden on desktop */
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+}
+
+#hamburger-btn .bar {
+    display: block;
+    width: 25px;
+    height: 3px;
+    margin: 5px auto;
+    background-color: white;
+    transition: all 0.3s ease-in-out;
+}
+
+/* --- rules.html specific styles --- */
+.rules-container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: rgba(29, 29, 29, 0.85); /* Dark, semi-transparent background */
+    backdrop-filter: blur(5px);
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #333;
+    text-align: left; /* Align rules text to the left */
+    color: #e0e0e0;
+    line-height: 1.6;
+}
+#rules-content {
+    white-space: pre-wrap; /* Respects newlines from the database */
+}
+.main-container {
+    margin-top: 80px;
+}
+.return-link-p {
+    color: white;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+}
+.return-link-a {
+    color: gold;
+}
+
+/* --- admin.html specific styles --- */
+.admin-body {
+    font-family: Arial, sans-serif;
+    background-color: #121212; /* Dark background */
+    margin: 0;
+    padding: 20px; /* Simple padding for spacing */
+    color: #e0e0e0; /* Light text */
+    text-align: left;
+}
+.admin-container {
+    background-color: #1e1e1e; /* Slightly lighter dark background */
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    max-width: 600px; /* Set a max-width */
+    margin: 0 auto; /* Center the container */
+}
+.admin-container h1, .admin-container h2 {
+    color: #ffffff;
+}
+.admin-container ul {
+    list-style-type: none;
+    padding: 0;
+}
+.admin-container li {
+    background-color: #2a2a2a;
+    border: 1px solid #444;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.admin-container li span {
+    flex-grow: 1;
+    margin-right: 10px;
+}
+.admin-container li input {
+    flex-grow: 1;
+    margin-right: 10px;
+}
+.admin-container li span .instructions-display {
+    display: block;
+    font-size: 0.9em;
+    color: #aaa;
+    margin-top: 5px;
+}
+.admin-container li .edit-input {
+    width: 100%;
+    margin-bottom: 5px;
+}
+.admin-container textarea {
+    width: 100%;
+    height: 200px;
+    padding: 10px;
+    font-size: 1rem;
+}
+.admin-container input[type="text"] {
+    background-color: #333;
+    color: #e0e0e0;
+    border: 1px solid #555;
+    border-radius: 4px;
+}
+.controls button, .add-form button {
+    margin-left: 5px;
+}
+.admin-container button {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.admin-container button:hover {
+    background-color: #0056b3;
+}
+.admin-container button.delete {
+    background-color: #dc3545;
+}
+.admin-container button.delete:hover {
+    background-color: #c82333;
+}
+.add-form {
+    margin-top: 20px;
+    display: flex;
+}
+.add-form input {
+    flex-grow: 1;
+    padding: 10px;
+    margin-right: 5px;
+}
+.add-form input:last-of-type {
+    margin-right: 0;
+}
+#signout-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    background-color: #dc3545; /* Red color for sign out */
+}
+#status, #rules-status {
+    margin-top: 10px;
+    color: green;
+}
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 1; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    overflow: auto; 
+    background-color: rgba(0,0,0,0.4);
+}
+.modal-content {
+    background-color: #1e1e1e;
+    margin: 5vh 15px;
+    padding: 20px;
+    border: 1px solid #444;
+    width: auto;
+    max-width: 800px;
+}
+#location-map {
+    height: 400px;
+    margin-bottom: 10px;
+}
+.close, .close-password {
+    color: #bbb;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+.close:hover, .close:focus,
+.close-password:hover, .close-password:focus {
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+}
+#change-password-form {
+    display: flex;
+    flex-direction: column;
+}
+#change-password-form label {
+    margin-top: 10px;
+    margin-bottom: 5px;
+}
+#change-password-form input {
+    padding: 8px;
+    font-size: 1rem;
+}
+#change-password-form button {
+    margin-top: 20px;
+}
+#password-status { margin-top: 10px; }
+
+/* --- Responsive Styles --- */
+@media (max-width: 768px) {
+    #hamburger-btn {
+        display: block; /* Show hamburger on mobile */
+    }
+
+    #main-nav {
+        display: none; /* Hide nav by default on mobile */
+        position: absolute;
+        top: 60px;
+        right: 20px;
+        background-color: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(5px);
+        border-radius: 8px;
+        padding: 10px;
+    }
+
+    #main-nav.is-open {
+        display: block; /* Show nav when hamburger is clicked */
+    }
+
+    #main-nav .admin-link, #main-nav .nav-link {
+        display: block; /* Stack links vertically */
+        margin: 5px 0; /* Add some vertical spacing */
+    }
+}
+
+@media (max-width: 600px) {
+    .admin-body {
+        padding: 15px;
+    }
+    .admin-container li {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .admin-container li span {
+        margin-right: 0;
+        margin-bottom: 10px;
+        word-break: break-all;
+    }
+    .controls {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .controls button {
+        margin-left: 0;
+        margin-bottom: 5px;
+        width: 100%;
+    }
+    .controls button:last-child {
+        margin-bottom: 0;
+    }
+    .add-form {
+        flex-direction: column;
+    }
+    .add-form input {
+        margin-bottom: 10px;
+        width: 100%;
+    }
+}
+
+/* --- Footer Styles --- */
+footer {
+    margin-top: 40px;
+    padding: 20px;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9em;
+    text-align: center;
+}

@@ -5,6 +5,11 @@ const path = require('path');
 const bcrypt = require('bcrypt');
 require('dotenv').config();
 
+// Security packages
+const session = require('express-session');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+
 // lowdb uses ES Modules, so we need to import it asynchronously
 // inside an async function.
 async function startServer() {
@@ -39,11 +44,72 @@ async function startServer() {
     const app = express();
     const PORT = process.env.PORT || 3000; // Use PORT from .env, or default to 3000
 
+    // Middleware to serve static files from the 'public' directory
+    app.use(express.static(path.join(__dirname, 'public')));
+
+    // --- Security Middleware Setup ---
+
+    // 1. Helmet: Adds various security headers.
+    app.use(helmet({
+        contentSecurityPolicy: {
+            directives: {
+                ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+                "script-src": [
+                    "'self'", // Allow scripts from our own server
+                    "https://unpkg.com" // Allow scripts from unpkg CDN (for Leaflet)
+                ],
+                "style-src": [
+                    "'self'", // Allow stylesheets from our own server
+                    "https://unpkg.com" // Allow stylesheets from unpkg CDN (for Leaflet)
+                ],
+                "img-src": ["'self'", "data:", "*.tile.openstreetmap.org", "https://unpkg.com"],
+                "connect-src": ["'self'", "https://nominatim.openstreetmap.org", "https://unpkg.com"],
+            },
+        },
+    }));
+
+    // 2. Body Parser Limits: Prevent large payloads from crashing the server.
     // Middleware to parse URL-encoded bodies (as sent by HTML forms)
     app.use(express.urlencoded({ extended: true }));
-
     // Middleware to parse JSON bodies (for API requests)
-    app.use(express.json());
+    app.use(express.json({ limit: '10kb' })); // Set a size limit
+
+    // 3. Session Management
+    // Note: For production, you'd want a more robust session store like connect-redis or connect-mongo.
+    // The default memory store is not suitable for production as it will leak memory over time.
+    app.use(session({
+        secret: process.env.SESSION_SECRET,
+        resave: false,
+        saveUninitialized: false,
+        cookie: {
+            secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+            httpOnly: true, // Prevents client-side JS from accessing the cookie
+            maxAge: 1000 * 60 * 60 // 1 hour
+        }
+    }));
+
+    // 4. Rate Limiting: Protect against brute-force attacks.
+    const authLimiter = rateLimit({
+        windowMs: 15 * 60 * 1000, // 15 minutes
+        max: 10, // Limit each IP to 10 requests per windowMs
+        standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+        legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+        message: 'Too many login or password change attempts from this IP, please try again after 15 minutes'
+    });
+
+    // --- Authentication Middleware ---
+    const isAuthenticated = (req, res, next) => {
+        if (req.session.user) {
+            return next();
+        }
+        // For API requests (which expect JSON), send a 401 Unauthorized error.
+        // For direct browser navigation, redirect to the sign-in page.
+        if (req.path.startsWith('/api/')) {
+            return res.status(401).json({ success: false, message: 'Unauthorized. Please sign in.' });
+        } else {
+            return res.redirect('/signin.html');
+        }
+    };
 
     // --- API Routes ---
 
@@ -60,19 +126,19 @@ async function startServer() {
     });
 
     // API endpoint to update the rules
-    app.post('/api/rules', async (req, res) => {
+    app.post('/api/rules', isAuthenticated, async (req, res) => {
         const { rules } = req.body;
         if (typeof rules === 'string') {
             db.data.rules = rules;
             await db.write();
             res.json({ success: true, message: 'Rules updated successfully.' });
         } else {
-            res.status(400).json({ success: false, message: 'Invalid data format. Expected a string for rules.' });
+            res.status(400).json({ success: false, message: 'Invalid data format.' });
         }
     });
 
     // API endpoint to update addresses
-    app.post('/api/addresses', async (req, res) => {
+    app.post('/api/addresses', isAuthenticated, async (req, res) => {
         const { addresses } = req.body;
 
         if (Array.isArray(addresses)) {
@@ -103,15 +169,18 @@ async function startServer() {
             await db.write();
             res.json({ success: true, message: 'Addresses updated successfully.' });
         } else {
-            res.status(400).json({ success: false, message: 'Invalid data format. Expected an array of addresses.' });
+            res.status(400).json({ success: false, message: 'Invalid data format.' });
         }
     });
 
-    // Middleware to serve static files from the 'public' directory
-    app.use(express.static(path.join(__dirname, 'public')));
+    // Protect admin.html
+    app.get('/admin.html', isAuthenticated, (req, res) => {
+        res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+    });
+
 
     // Route to handle the sign-in form submission
-    app.post('/signin', async (req, res) => {
+    app.post('/signin', authLimiter, async (req, res) => {
         const { username, password } = req.body;
 
         const isUsernameCorrect = process.env.ADMIN_USERNAME === username;
@@ -124,6 +193,8 @@ async function startServer() {
 
         if (isUsernameCorrect && isPasswordCorrect) {
             console.log('Authentication successful. Redirecting to admin page.');
+            // Set session data
+            req.session.user = true;
             res.redirect('/admin.html');
         } else {
             console.log('Authentication failed.');
@@ -131,8 +202,18 @@ async function startServer() {
         }
     });
 
+    // API endpoint to sign out
+    app.post('/api/signout', (req, res) => {
+        req.session.destroy(err => {
+            if (err) {
+                return res.status(500).json({ success: false, message: 'Could not sign out.' });
+            }
+            res.json({ success: true, message: 'Signed out successfully.' });
+        });
+    });
+
     // API endpoint to change the admin password
-    app.post('/api/change-password', async (req, res) => {
+    app.post('/api/change-password', isAuthenticated, authLimiter, async (req, res) => {
         const { currentPassword, newPassword } = req.body;
 
         if (!currentPassword || !newPassword) {

@@ -1,14 +1,20 @@
 {
   "addresses": [
     {
-      "text": "58 warri street ardlethan nsw 2665",
-      "lat": -34.35682670634581,
-      "lon": 146.90524864203329
+      "text": "58 warri street  ardlethan nsw 2665",
+      "lat": -34.35674499975966,
+      "lon": 146.90516281128342
     },
     {
       "text": "59 warri street ardlethan nsw 2665",
       "lat": -34.357108028606575,
       "lon": 146.90506196002391
+    },
+    {
+      "text": "1 yithan street  ardlethan nsw 2665",
+      "instructions": "side door near gate thankyou!",
+      "lat": -34.35775038310568,
+      "lon": 146.90369939804899
     }
   ],
   "rules": "1. Be respectful of properties and decorations.\n2. Trick-or-treating is from 5 PM to 9 PM.\n3. Have fun and be safe!",
