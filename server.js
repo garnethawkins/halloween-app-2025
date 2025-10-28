@@ -44,6 +44,10 @@ async function startServer() {
     const app = express();
     const PORT = process.env.PORT || 3000; // Use PORT from .env, or default to 3000
 
+    // Trust the first proxy. This is needed for secure cookies to work on Render.
+    // It must be set before you initialize the session middleware.
+    app.set('trust proxy', 1);
+
     // Middleware to serve static files from the 'public' directory
     app.use(express.static(path.join(__dirname, 'public')));
 
