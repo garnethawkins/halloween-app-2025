@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""/>
+    <title>Admin Dashboard</title>
+    <style>
+        * {
+            box-sizing: border-box; /* Makes layout math more intuitive */
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            background-color: #121212; /* Dark background */
+            margin: 0;
+            padding: 20px; /* Simple padding for spacing */
+            color: #e0e0e0; /* Light text */
+        }
+        .container {
+            background-color: white;
+            background-color: #1e1e1e; /* Slightly lighter dark background */
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            max-width: 600px; /* Set a max-width */
+            margin: 0 auto; /* Center the container */
+        }
+        h1, h2 {
+            color: #333;
+            color: #ffffff;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background-color: #f9f9f9;
+            background-color: #2a2a2a;
+            border: 1px solid #444;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        li span {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+        li input {
+            flex-grow: 1;
+            margin-right: 10px;
+            /* Styles for input fields are below */
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 10px;
+            font-size: 1rem;
+        }
+        input[type="text"] {
+            background-color: #333;
+            color: #e0e0e0;
+            border: 1px solid #555;
+            border-radius: 4px;
+        }
+        .controls button, .add-form button {
+            margin-left: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button.delete {
+            background-color: #dc3545;
+        }
+        button.delete:hover {
+            background-color: #c82333;
+        }
+        .add-form {
+            margin-top: 20px;
+            display: flex;
+        }
+        .add-form input {
+            flex-grow: 1;
+            padding: 10px;
+        }
+        #signout-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background-color: #dc3545; /* Red color for sign out */
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #signout-btn:hover {
+            background-color: #c82333;
+        }
+        #status {
+            margin-top: 10px;
+            color: green;
+        }
+        /* Modal styles */
+        .modal {
+            display: none; 
+            position: fixed; 
+            z-index: 1; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto; 
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #1e1e1e;
+            margin: 5vh 15px; /* Use viewport height for top/bottom margin and fixed px for sides */
+            padding: 20px;
+            border: 1px solid #444;
+            width: auto; /* Let the content and max-width define the width */
+            max-width: 800px;
+        }
+        #location-map {
+            height: 400px;
+            margin-bottom: 10px;
+        }
+        .close {
+            color: #bbb;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Responsive styles for smaller screens */
+        @media (max-width: 600px) {
+            body {
+                padding: 15px;
+                max-width: fit-content; /* This was the key fix */
+            }
+
+            li {
+                flex-direction: column; /* Stack address text and controls */
+                align-items: flex-start; /* Align items to the start */
+            }
+
+            li span {
+                margin-right: 0;
+                margin-bottom: 10px; /* Add space between address and controls */
+                word-break: break-all; /* Prevent long addresses from overflowing */
+            }
+
+            .controls {
+                width: 100%;
+                display: flex;
+                flex-direction: column; /* Stack buttons vertically */
+            }
+
+            .controls button {
+                margin-left: 0;
+                margin-bottom: 5px;
+                width: 100%;
+            }
+
+            .controls button:last-child {
+                margin-bottom: 0;
+            }
+
+            .add-form {
+                flex-direction: column; /* Stack the add address form */
+            }
+
+            .add-form input {
+                margin-bottom: 10px; /* Add space between input and button */
+                width: 100%;
+            }
+        }
+
+        /* Footer Styles */
+        footer {
+            margin-top: 40px;
+            padding: 20px;
+            color: rgba(224, 224, 224, 0.7); /* Slightly transparent light grey for dark mode */
+            font-size: 0.9em;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <button id="signout-btn">Sign Out</button>
+    <div class="container">
+        <h1>Admin Dashboard</h1>
+
+        <h2>Street Addresses</h2>
+        <ul id="address-list"></ul>
+        <p id="status"></p>
+
+        <hr>
+
+        <h2>Add New Address</h2>
+        <form id="add-address-form" class="add-form">
+            <input type="text" id="new-address" placeholder="Enter a new street address" required>
+            <button type="submit">Add Address</button>
+        </form>
+
+        <hr>
+
+        <h2>Edit Rules</h2>
+        <form id="rules-form">
+            <textarea id="rules-content" placeholder="Enter rules here..."></textarea>
+            <button type="submit" style="width: 100%; margin-top: 10px;">Save Rules</button>
+        </form>
+        <p id="rules-status"></p>
+
+
+        <!-- The Modal -->
+        <div id="location-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Set Marker Location</h2>
+                <p>Click on the map to place the marker accurately.</p>
+                <div id="location-map"></div>
+                <button id="save-location-btn">Save Location</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>Built by Dragonink Technologies 2025</footer>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""></script>
+    <script>
+        let currentAddresses = [];
+        const addressList = document.getElementById('address-list');
+        const statusEl = document.getElementById('status');
+
+        // --- Data and API Functions ---
+
+        const fetchAddresses = async () => {
+            const response = await fetch('/api/addresses');
+            currentAddresses = await response.json();
+            renderAddresses();
+        };
+
+        const saveAddresses = async () => {
+            const response = await fetch('/api/addresses', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ addresses: currentAddresses })
+            });
+            const result = await response.json();
+            statusEl.textContent = result.message;
+            setTimeout(() => statusEl.textContent = '', 3000);
+            fetchAddresses(); // Re-fetch to ensure sync with server
+        };
+
+        // --- Rendering and UI Functions ---
+
+        const renderAddresses = () => {
+            addressList.innerHTML = ''; // Clear the list
+            currentAddresses.forEach((address, index) => {
+                const li = document.createElement('li');
+                li.dataset.index = index;
+
+                const span = document.createElement('span');
+                span.textContent = address.text;
+
+                const controls = document.createElement('div');
+                controls.className = 'controls';
+
+                const editButton = document.createElement('button');
+                editButton.textContent = 'Edit';
+                editButton.onclick = () => handleEdit(index);
+
+                const setLocationButton = document.createElement('button');
+                setLocationButton.textContent = 'Set Location';
+                setLocationButton.onclick = () => openLocationModal(index);
+
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.className = 'delete';
+                deleteButton.onclick = () => handleDelete(index);
+
+                controls.append(setLocationButton, editButton, deleteButton);
+                li.append(span, controls);
+                addressList.appendChild(li);
+            });
+        };
+
+        const handleEdit = (index) => {
+            const li = addressList.querySelector(`li[data-index='${index}']`);
+            const span = li.querySelector('span');
+            const fullAddress = span.textContent;
+            const locationSuffix = " ardlethan nsw 2665";
+
+            // Show only the street part in the edit box if the address ends with the suffix
+            let streetPart = fullAddress;
+            if (fullAddress.toLowerCase().endsWith(locationSuffix)) {
+                streetPart = fullAddress.substring(0, fullAddress.length - locationSuffix.length).trim();
+            }
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = streetPart;
+
+            const saveButton = document.createElement('button');
+            saveButton.textContent = 'Save';
+            saveButton.onclick = () => {
+                const newStreetPart = input.value.trim();
+                // Re-append the suffix before saving
+                currentAddresses[index].text = `${newStreetPart} ${locationSuffix}`;
+                // Clear old coordinates to signal server to re-geocode
+                delete currentAddresses[index].lat;
+                delete currentAddresses[index].lon;
+                saveAddresses();
+            };
+
+            const cancelButton = document.createElement('button');
+            cancelButton.textContent = 'Cancel';
+            cancelButton.className = 'delete';
+            cancelButton.onclick = () => renderAddresses(); // Just re-render to cancel
+
+            const controls = li.querySelector('.controls');
+            controls.innerHTML = '';
+            controls.append(saveButton, cancelButton);
+
+            li.replaceChild(input, span);
+            input.focus();
+        };
+
+        const handleDelete = (index) => {
+            if (confirm(`Are you sure you want to delete "${currentAddresses[index].text}"?`)) {
+                currentAddresses.splice(index, 1);
+                saveAddresses();
+            }
+        };
+
+        // --- Event Listeners ---
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            fetchAddresses();
+
+            const rulesResponse = await fetch('/api/rules');
+            const rulesData = await rulesResponse.json();
+            document.getElementById('rules-content').value = rulesData.rules;
+        });
+
+        document.getElementById('signout-btn').addEventListener('click', () => {
+            // Redirect to the landing page
+            window.location.href = '/';
+        });
+
+        document.getElementById('add-address-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newAddressInput = document.getElementById('new-address');
+            const streetAddress = newAddressInput.value.trim();
+            if (streetAddress) {
+                const locationSuffix = "ardlethan nsw 2665";
+                const fullAddress = `${streetAddress} ${locationSuffix}`;
+                currentAddresses.push({ text: fullAddress });
+                saveAddresses();
+                newAddressInput.value = ''; // Clear input field
+            }
+        });
+
+        document.getElementById('rules-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const rulesContent = document.getElementById('rules-content').value;
+            const response = await fetch('/api/rules', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ rules: rulesContent })
+            });
+
+            const result = await response.json();
+            const rulesStatusEl = document.getElementById('rules-status');
+            rulesStatusEl.textContent = result.message;
+            rulesStatusEl.style.color = 'green';
+            setTimeout(() => rulesStatusEl.textContent = '', 3000);
+        });
+
+        // --- Modal and Map Logic ---
+        const modal = document.getElementById('location-modal');
+        const closeBtn = document.querySelector('.modal .close');
+        let locationMap = null;
+        let currentMarker = null;
+        let editingIndex = -1;
+
+        closeBtn.onclick = () => modal.style.display = "none";
+        window.onclick = (event) => {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        };
+
+        async function openLocationModal(index) {
+            editingIndex = index;
+            const address = currentAddresses[index];
+            modal.style.display = "block";
+
+            if (!locationMap) { // Initialize map only once
+                locationMap = L.map('location-map').setView([-33.8688, 151.2093], 10); // Default to Sydney
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(locationMap);
+
+                locationMap.on('click', (e) => {
+                    if (currentMarker) {
+                        currentMarker.setLatLng(e.latlng);
+                    } else {
+                        currentMarker = L.marker(e.latlng).addTo(locationMap);
+                    }
+                });
+            }
+
+            // Invalidate map size to ensure it renders correctly inside the modal
+            setTimeout(() => {
+                locationMap.invalidateSize();
+            }, 10);
+
+            if (currentMarker) {
+                locationMap.removeLayer(currentMarker);
+                currentMarker = null;
+            }
+
+            if (address.lat && address.lon) {
+                const latLng = [address.lat, address.lon];
+                currentMarker = L.marker(latLng).addTo(locationMap);
+                locationMap.setView(latLng, 15);
+            } else {
+                // Geocode the address to get a starting position for the map
+                try {
+                    const geoResponse = await fetch(`https://nominatim.openstreetmap.org/search?format=json&countrycodes=au&q=${encodeURIComponent(address.text)}`, {
+                        headers: { 'User-Agent': 'HalloweenApp/1.0 (https://example.com/)' }
+                    });
+                    const geoData = await geoResponse.json();
+
+                    if (geoData && geoData.length > 0) {
+                        const { lat, lon } = geoData[0];
+                        locationMap.setView([lat, lon], 13); // Zoom to the geocoded location
+                    } else {
+                        locationMap.setView([-33.8688, 151.2093], 10); // Fallback to Sydney
+                    }
+                } catch (error) {
+                    console.error('Error geocoding for modal map:', error);
+                    locationMap.setView([-33.8688, 151.2093], 10); // Fallback on error
+                }
+            }
+        }
+
+        document.getElementById('save-location-btn').onclick = () => {
+            if (currentMarker && editingIndex > -1) {
+                const { lat, lng } = currentMarker.getLatLng();
+                currentAddresses[editingIndex].lat = lat;
+                currentAddresses[editingIndex].lon = lng;
+                saveAddresses();
+                modal.style.display = "none";
+            }
+        };
+    </script>
+</body>
+</html>
