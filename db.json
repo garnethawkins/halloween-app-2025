@@ -6,16 +6,83 @@
       "lon": 146.90516281128342
     },
     {
+      "text": "37 warri street  ardlethan nsw 2665",
+      "lat": -34.356522,
+      "lon": 146.9028803
+    },
+    {
+      "text": "72 ariah street  ardlethan nsw 2665",
+      "lat": -34.3576583,
+      "lon": 146.9031622
+    },
+    {
+      "text": "25 park street ardlethan nsw 2665",
+      "lat": -34.3513727,
+      "lon": 146.90094
+    },
+    {
+      "text": "4 fisher street ardlethan nsw 2665",
+      "lat": -34.3505745,
+      "lon": 146.9004917
+    },
+    {
+      "text": "6 fisher street ardlethan nsw 2665",
+      "lat": -34.3505745,
+      "lon": 146.9004917
+    },
+    {
+      "text": "34 park street ardlethan nsw 2665",
+      "lat": -34.3513727,
+      "lon": 146.90094
+    },
+    {
+      "text": "32 park street ardlethan nsw 2665",
+      "lat": -34.3513727,
+      "lon": 146.90094
+    },
+    {
+      "text": "5 mithul street ardlethan nsw 2665",
+      "lat": -34.3518956,
+      "lon": 146.9026404
+    },
+    {
+      "text": "16 Keogh avenue ardlethan nsw 2665",
+      "lat": -34.3483411,
+      "lon": 146.8998851
+    },
+    {
+      "text": "8 Keogh avenue ardlethan nsw 2665",
+      "lat": -34.3483411,
+      "lon": 146.8998851
+    },
+    {
+      "text": "1 ariah street  ardlethan nsw 2665",
+      "lat": -34.3577396,
+      "lon": 146.9027236
+    },
+    {
+      "text": "11 barellan street  ardlethan nsw 2665",
+      "lat": -34.3542978,
+      "lon": 146.9043764
+    },
+    {
       "text": "59 warri street ardlethan nsw 2665",
       "lat": -34.357108028606575,
       "lon": 146.90506196002391
     },
+    {
+      "text": "13 yithan street ardlethan nsw 2665 ",
+      "lat": -34.3553,
+      "lon": 146.9042057
+    },
+    
     {
       "text": "1 yithan street  ardlethan nsw 2665",
       "instructions": "side door near gate thankyou!",
       "lat": -34.35775038310568,
       "lon": 146.90369939804899
     }
+  
   ],
   "rules": "1. Be respectful of properties and decorations.\n2. Trick-or-treating is from 5 PM to 9 PM.\n3. Have fun and be safe!",
   "adminPassword": "$2b$10$W.8SZl1MOXC85Fl.e7z9q.dr4yc.kZSqSApMPTIeI/I4q6OH1tpU2"
